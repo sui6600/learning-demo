@@ -10,6 +10,45 @@
   display: none !important;
 }
 
+/* --- 警告メッセージ（さらに大きく目立つ赤色に変更） --- */
+.demo-warning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #ff3333;
+  color: #ffffff;
+  text-align: center;
+  padding: 12px 10px;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  z-index: 9999;
+}
+
+/* --- 架空のロゴ用スタイル --- */
+.mock-logo {
+  font-size: 26px;
+  font-weight: 900;
+  color: #1a73e8;
+  letter-spacing: -1px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.mock-logo .logo-icon {
+  background: #1a73e8;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
 /* --- 被害者側（白・青基調） --- */
 .victim-body {
   background-color: #f4f6f9;
@@ -18,18 +57,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-}
-
-.demo-warning {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: #ffeb3b;
-  color: #333;
-  text-align: center;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: bold;
+  padding-top: 40px;
 }
 
 .login-container {
@@ -169,5 +197,4 @@
   border-radius: 6px;
   cursor: pointer;
 }
-
 

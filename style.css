@@ -1,0 +1,173 @@
+/* 全体共通設定 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --- 被害者側（白・青基調） --- */
+.victim-body {
+  background-color: #f4f6f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.demo-warning {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #ffeb3b;
+  color: #333;
+  text-align: center;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.login-container {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login-container h2 {
+  color: #1a73e8;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.input-group {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  font-size: 12px;
+  color: #333;
+  font-weight: bold;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+/* --- 管理者側（ダークモード・ハッカー調） --- */
+.admin-body {
+  background-color: #0d1117;
+  color: #c9d1d9;
+  padding: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-header h1 {
+  font-size: 20px;
+  color: #58a6ff;
+}
+
+.stats-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  width: 200px;
+}
+
+.count-number {
+  font-size: 36px;
+  font-weight: bold;
+  color: #f85149;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #161b22;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.log-table th, .log-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #30363d;
+}
+
+.log-table th {
+  background: #21262d;
+  color: #8b949e;
+}
+
+.badge {
+  background: #238636;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.highlight {
+  color: #58a6ff;
+}
+
+.password-danger {
+  color: #f85149;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.btn-danger {
+  background: #da3633;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>攻撃者ダッシュボード | 管理画面</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-header">
+    <h1>☠️ 奪取データ・リアルタイムログ (攻撃者視点)</h1>
+    <button onclick="clearLogs()" class="btn-danger">ログを全消去</button>
+  </div>
+
+  <div class="admin-container">
+    <div class="stats-card">
+      <h3>奪取したアカウント数</h3>
+      <p id="count" class="count-number">0</p>
+    </div>
+
+    <table class="log-table">
+      <thead>
+        <tr>
+          <th>受信時刻</th>
+          <th>検出端末 (User-Agent)</th>
+          <th>ユーザーID</th>
+          <th>パスワード</th>
+        </tr>
+      </thead>
+      <tbody id="log-list">
+        <!-- JavaScriptでここにデータが入ります -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function renderLogs() {
+      const logs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
+      const listContainer = document.getElementById('log-list');
+      const countContainer = document.getElementById('count');
+
+      countContainer.innerText = logs.length;
+      listContainer.innerHTML = '';
+
+      if (logs.length === 0) {
+        listContainer.innerHTML = '<tr><td colspan="4" style="text-align:center;">まだデータを受信していません</td></tr>';
+        return;
+      }
+
+      logs.forEach(log => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${log.time}</td>
+          <td><span class="badge">${log.device}</span></td>
+          <td class="highlight">${log.username}</td>
+          <td class="password-danger">${log.password}</td>
+        `;
+        listContainer.appendChild(tr);
+      });
+    }
+
+    function clearLogs() {
+      if (confirm('蓄積されたデータを削除しますか？')) {
+        localStorage.removeItem('stolen_logs');
+        renderLogs();
+      }
+    }
+
+    // 画面を開いた時と、1秒ごとにデータを自動更新
+    renderLogs();
+    setInterval(renderLogs, 1000);
+  </script>
+</body>
+</html>
+
+

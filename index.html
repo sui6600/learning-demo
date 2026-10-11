@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ログイン | セキュリティ確認（デモ）</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="victim-body">
+  <div class="demo-warning">⚠️ これはセキュリティ教育用の検証用サイトです（本物の企業サイトではありません）</div>
+
+  <div class="login-container" id="login-box">
+    <h2>アカウントログイン</h2>
+    <p class="subtitle">サービスをご利用いただくにはログインが必要です</p>
+    
+    <form id="login-form">
+      <div class="input-group">
+        <label>ユーザーID / メールアドレス</label>
+        <input type="text" id="username" placeholder="example@email.com" required>
+      </div>
+      <div class="input-group">
+        <label>パスワード</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-primary">ログイン</button>
+    </form>
+  </div>
+
+  <!-- 送信後の偽エラー画面 -->
+  <div class="login-container hidden" id="error-box">
+    <div class="error-icon">⚠️</div>
+    <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
+    <p>現在システムメンテナンス中です。<br>恐れ入りますが、しばらく時間を置いてから再度お試しください。</p>
+  </div>
+
+  <script>
+    // 端末情報（OS/ブラウザ）を判定する関数
+    function getDeviceInfo() {
+      const ua = navigator.userAgent;
+      if (ua.includes("iPhone")) return "iPhone (iOS)";
+      if (ua.includes("iPad")) return "iPad (iOS)";
+      if (ua.includes("Android")) return "Androidスマホ";
+      if (ua.includes("Windows")) return "Windows PC";
+      if (ua.includes("Mac")) return "Mac PC";
+      return "不明な端末";
+    }
+
+    // フォーム送信時の処理
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const device = getDeviceInfo();
+      const time = new Date().toLocaleTimeString();
+
+      // 新しいデータオブジェクト
+      const newData = { time, device, username, password };
+
+      // ローカルストレージから既存データを取得して追加
+      let logs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
+      logs.unshift(newData); // 新しい順に先頭へ追加
+      localStorage.setItem('stolen_logs', JSON.stringify(logs));
+
+      // 画面を「エラー画面」に切り替え（フィッシング詐欺の典型手口）
+      document.getElementById('login-box').classList.add('hidden');
+      document.getElementById('error-box').classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
+
+

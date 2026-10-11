@@ -7,9 +7,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="victim-body">
-  <div class="demo-warning">⚠️ これはセキュリティ教育用の検証用サイトです（本物の企業サイトではありません）</div>
+  
+  <!-- 赤く大きく目立つ警告テロップ -->
+  <div class="demo-warning">
+    🚨 ［セキュリティ学習用デモ］これは教育目的の擬似サイトです。実際の情報やパスワードは入力しないでください。
+  </div>
 
   <div class="login-container" id="login-box">
+    
+    <!-- CSSで作った架空のロゴ -->
+    <div class="mock-logo">
+      <span class="logo-icon">🛡️ S</span>
+      <span>SecurePay</span>
+    </div>
+
     <h2>アカウントログイン</h2>
     <p class="subtitle">サービスをご利用いただくにはログインが必要です</p>
     
@@ -34,7 +45,6 @@
   </div>
 
   <script>
-    // 端末情報（OS/ブラウザ）を判定する関数
     function getDeviceInfo() {
       const ua = navigator.userAgent;
       if (ua.includes("iPhone")) return "iPhone (iOS)";
@@ -45,7 +55,6 @@
       return "不明な端末";
     }
 
-    // フォーム送信時の処理
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -54,20 +63,16 @@
       const device = getDeviceInfo();
       const time = new Date().toLocaleTimeString();
 
-      // 新しいデータオブジェクト
       const newData = { time, device, username, password };
 
-      // ローカルストレージから既存データを取得して追加
       let logs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
-      logs.unshift(newData); // 新しい順に先頭へ追加
+      logs.unshift(newData);
       localStorage.setItem('stolen_logs', JSON.stringify(logs));
 
-      // 画面を「エラー画面」に切り替え（フィッシング詐欺の典型手口）
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
     });
   </script>
 </body>
 </html>
-
 

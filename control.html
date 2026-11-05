@@ -3,119 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>裏コマンド操作パネル | セキュリティデモ制御</title>
-  <style>
-    body {
-      background-color: #0d1117;
-      color: #c9d1d9;
-      font-family: sans-serif;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    .panel {
-      background: #161b22;
-      border: 1px solid #30363d;
-      padding: 25px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
-    h2 { color: #f85149; margin-top: 0; font-size: 18px; text-align: center; }
-    p { font-size: 13px; color: #8b949e; text-align: center; margin-bottom: 20px; }
-    .btn-emergency {
-      width: 100%;
-      padding: 15px;
-      background: #da3633;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-emergency:hover { background: #b62324; }
-    #status {
-      margin-top: 15px;
-      text-align: center;
-      font-size: 13px;
-      font-weight: bold;
-      color: #d29922;
-    }
-    .preview-box {
-      margin-top: 20px;
-      background: #010409;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: #7ee787;
-    }
-  </style>
-  <!-- PeerJSの読み込み -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <title>コントロールパネル | デモ操作</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="admin-body" style="padding: 20px;">
+  
+  <div class="admin-header" style="margin-bottom: 20px;">
+    <h1>⚙️ 発表者用コントロールパネル</h1>
+    <div style="color: #58a6ff; font-weight: bold;">緊急時・保険用データ送出ツール</div>
+  </div>
 
-  <div class="panel">
-    <h2>⚡ 緊急代行送信パネル</h2>
-    <p>本番で接続がうまくいかない時にこのボタンを押すと、勝手に入力・送信を代行します。</p>
+  <div style="background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto;">
+    <h3 style="color: #c9d1d9; margin-bottom: 10px;">🚀 即時データ強制送信</h3>
+    <p style="font-size: 13px; color: #8b949e; margin-bottom: 15px;">本番で万が一スマホからの入力に手間取った際、このボタンを押すだけでPCの管理者画面にダミーデータを一瞬で反映させることができます。</p>
     
-    <button class="btn-emergency" onclick="sendEmergencyData()">🚀 代行データを一瞬で送信する</button>
-    
-    <div id="status">PC管理者との接続待機中...</div>
-
-    <div class="preview-box">
-      <strong>送信予定データ:</strong><br>
-      ID: target_user@sample.com<br>
-      PW: secretP@ss2026
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:4px;">送信するユーザーID</label>
+      <input type="text" id="target-user" value="victim_demo@secure.jp" style="width: 100%; padding: 8px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 4px;">
     </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:4px;">送信するパスワード</label>
+      <input type="text" id="target-pass" value="p@ssword!2026" style="width: 100%; padding: 8px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 4px;">
+    </div>
+
+    <button onclick="sendDirectData()" style="padding: 12px 20px; background: #238636; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 14px;">⚡ 管理者画面へデータを強制送信する</button>
   </div>
 
   <script>
-    // admin.htmlで指定しているID（例: "123"）と必ず同じに合わせる
-    const targetRoomId = "123"; 
-
-    let peer = new Peer();
-    let conn = null;
-
-    peer.on('open', () => {
-      document.getElementById('status').innerText = "PC管理者へ接続中...";
+    function sendDirectData() {
+      // 同じGitHubリポジトリ内にある admin.html をターゲットにする
+      const adminBaseUrl = "admin.html";
       
-      // PC（admin.html）に直接接続を確立する
-      conn = peer.connect("sec-demo-" + targetRoomId, { reliable: true });
-      
-      conn.on('open', () => {
-        document.getElementById('status').innerText = "🟢 接続完了（いつでも送信可能）";
-        document.getElementById('status').style.color = "#2ea043";
-      });
-    });
-
-    peer.on('error', (err) => {
-      console.error(err);
-      document.getElementById('status').innerText = "🔴 接続エラー（リロードしてください）";
-    });
-
-    function sendEmergencyData() {
+      const username = document.getElementById('target-user').value;
+      const password = document.getElementById('target-pass').value;
+      const device = "Control Panel (Emergency)";
       const time = new Date().toLocaleTimeString();
-      const device = "iPhone 15 Pro (Safari)";
-      const username = "target_user@sample.com";
-      const password = "secretP@ss2026";
 
-      const stolenData = { time, device, username, password };
+      const params = new URLSearchParams({
+        time: time,
+        device: device,
+        username: username,
+        password: password
+      });
 
-      if (conn && conn.open) {
-        conn.send(stolenData);
-        alert("代行データを送信しました！PC画面を確認してください。");
-      } else {
-        alert("⚠️ まだPCと接続が確立されていません。ページを再読み込みしてください。");
-      }
+      // 管理者画面にジャンプしてデータを渡す
+      window.location.href = `${adminBaseUrl}?${params.toString()}`;
     }
   </script>
 </body>
 </html>
+

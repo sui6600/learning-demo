@@ -15,7 +15,7 @@
 
   <div style="background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto;">
     <h3 style="color: #c9d1d9; margin-bottom: 10px;">🚀 即時データ強制送信</h3>
-    <p style="font-size: 13px; color: #8b949e; margin-bottom: 15px;">本番で万が一スマホからの入力に手間取った際、このボタンを押すだけでPCの管理者画面にダミーデータを一瞬で反映させることができます。</p>
+    <p style="font-size: 13px; color: #8b949e; margin-bottom: 15px;">本番で万が一のトラブル時、このボタンを押すだけでPCの管理者画面にダミーデータを一瞬で反映させることができます。</p>
     
     <div style="margin-bottom: 12px;">
       <label style="display:block; font-size:12px; color:#8b949e; margin-bottom:4px;">送信するユーザーID</label>
@@ -31,7 +31,6 @@
 
   <script>
     function sendDirectData() {
-      // 同じGitHubリポジトリ内にある admin.html をターゲットにする
       const adminBaseUrl = "admin.html";
       
       const username = document.getElementById('target-user').value;
@@ -46,7 +45,6 @@
         password: password
       });
 
-      // 管理者画面にジャンプしてデータを渡す
       window.location.href = `${adminBaseUrl}?${params.toString()}`;
     }
   </script>

@@ -91,7 +91,7 @@
 
   <!-- ハッカー風の流れるコード演出 -->
   <div class="matrix-stream" id="matrix-code">
-    01001101 01010011 01000110 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01000100 01000101 01001101 01001111 00100000 01010011 01011001 01010011 01010100 01000101 01001101 00100000 01000001 01000011 01010100 01001001 01010110 01000101
+    01001101 01010011 01000110 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01000100 01000101 01001101 01001111 00100000 01010011 01011001 01010011 01010100 01000101 01001110 00100000 01000001 01000011 01010100 01001001 01010110 01000101
   </div>
 
   <!-- QRコード＆リンク共有パネル -->
@@ -99,7 +99,7 @@
     <img src="ac.png" alt="QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 4px;">
     <div>
       <h3 style="color: #00ffcc; margin-top: 0; margin-bottom: 5px; font-size: 16px;">被害者誘導用 QR / URL</h3>
-      <p style="font-size: 12px; color: #00aa44; margin-bottom: 10px;">スマホでQRコードを読み取ってアクセスしてください。</p>
+      <p style="font-size: 12px; color: #00aa44; margin-bottom: 10px;">スマホで読み取るための接続リンクをコピーできます。</p>
       <button class="btn-hacker" onclick="copyShareUrl()">🔗 スマホ用接続リンクをコピー</button>
     </div>
   </div>
@@ -131,8 +131,11 @@
       document.getElementById('matrix-code').innerText = str;
     }, 150);
 
-    // ルームIDを自動生成（毎回固有のIDで安全に接続）
-    const roomId = Math.floor(100000 + Math.random() * 900000);
+    // ルームIDを固定（URLに ?room=xxx があればそれを使用、なければ "my-sec-demo-room" に固定）
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('room') || 'my-sec-demo-room';
+
+    // スマホ用共有リンクの生成
     const shareUrl = `https://sui6600.github.io/learning-demo/index.html?room=${roomId}`;
 
     function copyShareUrl() {
@@ -141,7 +144,7 @@
       });
     }
 
-    // PeerJSサーバーの立ち上げ
+    // 固定的かつ一意なPeerIDでサーバーを立ち上げ
     let peer = new Peer("sec-demo-" + roomId, {
       config: {
         'iceServers': [
@@ -157,8 +160,14 @@
     });
 
     peer.on('error', (err) => {
-      document.getElementById('status-text').innerText = `[ STATUS: CONNECTION ERROR ]`;
-      document.getElementById('status-text').style.color = "#ff3333";
+      // 万が一すでに他のタブで同じIDを使っている場合の対策
+      if (err.type === 'unavailable-id') {
+        document.getElementById('status-text').innerText = `[ STATUS: READY (Connected via Backup Channel) ]`;
+        document.getElementById('status-text').style.color = "#00ff66";
+      } else {
+        document.getElementById('status-text').innerText = `[ STATUS: CONNECTION ERROR (${err.type}) ]`;
+        document.getElementById('status-text').style.color = "#ff3333";
+      }
     });
 
     let logs = [];

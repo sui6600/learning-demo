@@ -3,174 +3,135 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>C&C Server | Hacker Dashboard</title>
+  <title>攻撃者ダッシュボード | 管理画面</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    body.hacker-body {
-      background-color: #050505;
-      color: #00ff66;
-      font-family: 'Courier New', Courier, monospace;
-      margin: 0;
-      padding: 20px;
-      overflow-x: hidden;
-    }
+    /* ハッカー風の数字・ログが流れる演出 */
     .matrix-bg {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(5, 5, 5, 0.95), rgba(5, 5, 5, 0.95)),
-                  repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 100, 0.03) 2px, rgba(0, 255, 100, 0.03) 4px);
-      z-index: -1;
-      pointer-events: none;
-    }
-    .terminal-header {
-      border-bottom: 1px dashed #00ff66;
-      padding-bottom: 15px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .matrix-stream {
-      font-size: 11px;
-      color: #005522;
-      height: 40px;
-      overflow: hidden;
-      white-space: nowrap;
-      margin-bottom: 15px;
-    }
-    .hacker-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: #0a0f0d;
-      border: 1px solid #00ff66;
-    }
-    .hacker-table th, .hacker-table td {
-      border: 1px solid #003311;
-      padding: 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-    .hacker-table th {
-      background: #002209;
-      color: #00ff66;
-    }
-    .hacker-table td {
-      color: #00ffcc;
-    }
-    .btn-hacker {
-      background: #002209;
-      color: #00ff66;
-      border: 1px solid #00ff66;
-      padding: 8px 15px;
-      cursor: pointer;
       font-family: 'Courier New', Courier, monospace;
-      font-weight: bold;
-      border-radius: 4px;
-    }
-    .btn-hacker:hover {
-      background: #00ff66;
-      color: #000;
+      font-size: 11px;
+      color: #00ffcc55;
+      background: #0d1117;
+      padding: 10px;
+      border-radius: 6px;
+      height: 60px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      white-space: nowrap;
     }
   </style>
 </head>
-<body class="hacker-body">
-  <div class="matrix-bg"></div>
+<body class="admin-body">
 
-  <div class="terminal-header">
-    <div>
-      <h1 style="margin: 0; font-size: 22px; color: #00ff66;">⚡ C&C COMMAND & CONTROL SERVER</h1>
-      <div id="status-text" style="font-size: 12px; color: #ff3333; margin-top: 5px;">[ STATUS: READY FOR DATA RECEPTION ]</div>
-    </div>
-    <div style="text-align: right;">
-      <div style="font-size: 12px; color: #00aa44;">TOTAL TARGETS: <span id="count" style="color: #fff; font-weight: bold;">0</span></div>
-    </div>
+  <div class="admin-header">
+    <h1>🔴 ATTACKER CONTROL PANEL (C&C Server)</h1>
+    <div id="connection-status" style="color: #2ed573; font-weight: bold;">🟢 監視中（データ受信待機モード）</div>
   </div>
 
-  <div class="matrix-stream" id="matrix-code">
-    01001101 01010011 01000110 00100000 01010011 01000101 01000011 01010101 01010010 01001001 01010100 01011001 00100000 01000100 01000101 01001101 01001111 00100000 01010011 01011001 01010011 01010100 01000101 01001110 00100000 01000001 01000011 01010100 01001001 01010110 01000101
+  <!-- ハッカー風の演出エリア -->
+  <div class="matrix-bg" id="matrix-stream">
+    [SYSTEM INITIALIZED] SECURE PROXY ACTIVE... LISTENING ON PORT 443... PACKET ENCRYPTION 256-BIT... READY FOR TARGET ACQUISITION...
   </div>
 
-  <div style="background: #0a0f0d; border: 1px solid #00ff66; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;">
-    <img src="ac.png" alt="QRコード" style="width: 100px; height: 100px; background: white; padding: 4px; border-radius: 4px;">
-    <div>
-      <h3 style="color: #00ffcc; margin-top: 0; margin-bottom: 5px; font-size: 16px;">被害者誘導用リンク</h3>
-      <p style="font-size: 12px; color: #00aa44; margin-bottom: 10px;">スマホ用ページへのリンクをコピーできます。</p>
-      <button class="btn-hacker" onclick="copyShareUrl()">🔗 スマホ用リンクをコピー</button>
+  <!-- 操作パネル：ここからワンクリックで被害者画面へ飛べる！ -->
+  <div style="background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <img src="ac.png" alt="接続用QRコード" style="width: 80px; height: 80px; background: white; padding: 4px; border-radius: 6px;">
+      <div>
+        <h3 style="color: #58a6ff; margin-bottom: 5px; font-size: 15px;">被害者シミュレーション機能</h3>
+        <p style="font-size: 12px; color: #8b949e; margin-bottom: 0;">PC1台でデモを行う場合、下のボタンから直接被害者画面に移動できます。</p>
+      </div>
     </div>
+    <button onclick="goToVictimPage()" style="padding: 10px 16px; background: #1f6feb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap;">🌐 被害者画面を開く</button>
   </div>
 
-  <h3 style="color: #00ff66; border-left: 3px solid #00ff66; padding-left: 8px; margin-top: 30px;">📂 STOLEN CREDENTIALS (強奪データログ)</h3>
+  <div class="stats-card">
+    <div style="font-size: 12px; color: #8b949e;">総奪取データ数</div>
+    <div class="count-number" id="count">0</div>
+  </div>
 
-  <table class="hacker-table">
+  <table class="log-table">
     <thead>
       <tr>
         <th>受信時刻</th>
-        <th>デバイス</th>
-        <th>キャプチャされたID</th>
-        <th>パスワード</th>
+        <th>端末情報</th>
+        <th>入力されたID</th>
+        <th>奪取されたパスワード</th>
       </tr>
     </thead>
     <tbody id="log-list">
-      <tr><td colspan="4" style="text-align:center; color: #005522;">等待機中... (Waiting for incoming data...)</td></tr>
+      <tr><td colspan="4" style="text-align:center; color: #8b949e;">スマホ・被害者からの入力を待機しています...</td></tr>
     </tbody>
   </table>
 
   <script>
-    setInterval(() => {
-      const chars = "0101010101ABCDEF0123456789#$&@<>SECURITY_BREACH_DETECTED_";
-      let str = "";
-      for(let i=0; i<80; i++) {
-        str += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      document.getElementById('matrix-code').innerText = str;
-    }, 150);
-
-    const shareUrl = `https://sui6600.github.io/learning-demo/index.html`;
-
-    function copyShareUrl() {
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        alert("スマホ用リンクをコピーしました！");
-      });
+    // 管理者画面から被害者画面へ飛ぶ関数（URLを変えずに同じ構成で移動）
+    function goToVictimPage() {
+      window.location.href = "index.html";
     }
 
     let logs = [];
 
-    // URLパラメータからデータを受け取って即座に反映
+    // ページ読み込み時にURLパラメータにデータがあるかチェック（データがあれば自動でログ追加）
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('username')) {
-      const log = {
-        time: urlParams.get('time') || new Date().toLocaleTimeString(),
-        device: urlParams.get('device') || 'Target Smartphone',
+      const newLog = {
+        time: urlParams.get('time'),
+        device: urlParams.get('device'),
         username: urlParams.get('username'),
         password: urlParams.get('password')
       };
-      logs.unshift(log);
-      renderLogs();
-      
-      document.getElementById('status-text').innerText = "[ STATUS: TARGET COMPROMISED! DATA SECURED ]";
-      document.getElementById('status-text').style.color = "#00ff66";
+
+      // ローカルストレージを使って複数回のデータも消えずに蓄積できるようにする
+      const savedLogs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
+      savedLogs.unshift(newLog);
+      localStorage.setItem('stolen_logs', JSON.stringify(savedLogs));
+
+      // URLのパラメータを綺麗に消す（再読み込み対策）
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
 
+    // 保存されているログを画面に描画
     function renderLogs() {
+      const savedLogs = JSON.parse(localStorage.getItem('stolen_logs') || '[]');
       const listContainer = document.getElementById('log-list');
       const countContainer = document.getElementById('count');
 
-      countContainer.innerText = logs.length;
-      listContainer.innerHTML = '';
+      countContainer.innerText = savedLogs.length;
 
-      logs.forEach(log => {
+      if (savedLogs.length === 0) {
+        listContainer.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #8b949e;">スマホ・被害者からの入力を待機しています...</td></tr>';
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      savedLogs.forEach(log => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${log.time}</td>
-          <td>${log.device}</td>
-          <td style="color: #ffffff; font-weight: bold;">${log.username}</td>
-          <td style="color: #ff3366; font-weight: bold; background: #220000;">${log.password}</td>
+          <td><span class="badge">${log.device}</span></td>
+          <td class="highlight">${log.username}</td>
+          <td class="password-danger">${log.password}</td>
         `;
         listContainer.appendChild(tr);
       });
+
+      document.getElementById('connection-status').innerText = "🔥 被害者からのデータ強奪成功！";
+      document.getElementById('connection-status').style.color = "#ff4757";
     }
+
+    // 初回描画
+    renderLogs();
+
+    // ハッカー風の数字・記号を流す演出
+    const chars = "01ABCDEF#$@*&<>/\\";
+    setInterval(() => {
+      let line = "";
+      for(let i=0; i<60; i++) {
+        line += chars[Math.floor(Math.random() * chars.length)];
+      }
+      document.getElementById('matrix-stream').innerText = "PACKET STREAM: " + line;
+    }, 150);
   </script>
 </body>
 </html>
-
